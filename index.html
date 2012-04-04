@@ -17,7 +17,7 @@
 <body class="front logged-in page-home one-sidebar sidebar-right admin-nw admin-vertical admin-df  one-sidebar sidebar-right">
 
   <!-- Embed Start -->
-  <div class=" node-body fieldlayout node-field-body">
+  <div class="node-body fieldlayout node-field-body">
     <style type="text/css">
     	/* @import url('http://data.minnpost.s3.amazonaws.com/js/datatables-1.9.0/css/jquery.dataTables.css'); */
     </style>
@@ -25,17 +25,97 @@
     </style>
   
   
-  
-  
+    <div id="temperature-dashboard"></div>
+      <div id="temperature-controls"></div>
+      <div id="temperature-chart"></div>
+      <div id="temperature-table"></div>
+    </div>
   
   
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="http://stevenlevithan.com/assets/misc/date.format.js"></script>
     <script type="text/javascript">
       // Namespace jQuery
       (function($) {
       
-      $(document).ready(function() {
-      });
+        // Load the Visualization API and the piechart package.
+        google.load('visualization', '1.0', {'packages':['corechart']});
+        google.setOnLoadCallback(function() {
+          
+          $.getJSON('data/temperature-records-twin-cities-2012.json', function(data) {
+            console.log(data);
+            
+            var table = new google.visualization.DataTable();
+            // The type can be one of the following: 'string' 'number' 'boolean' 'date' 'datetime' 'timeofday'.
+            table.addColumn('string', 'Date', 'date');
+            table.addColumn('date', 'Date Object', 'date_object');
+            table.addColumn('string', 'Historical Data', 'url');
+            table.addColumn('number', 'High', 'actual_max');
+            table.addColumn('number', 'Low', 'actual_mean');
+            table.addColumn('number', 'Avg High', 'average_max');
+            table.addColumn('number', 'Avg Mean', 'average_mean');
+            table.addColumn('number', 'Avg Low', 'average_min');
+            table.addColumn('number', 'Record High', 'record_max');
+            table.addColumn('number', 'Record High Year', 'record_max_year');
+            table.addColumn('number', 'Record Low', 'record_min');
+            table.addColumn('number', 'Record Low Year', 'record_min_year');
+            table.addColumn('string', 'Record Broke', 'record_broke');
+            table.addColumn('number', 'Percent of Low above average', 'percent_low_above_avg');
+            table.addColumn('number', 'Percent of High above average', 'percent_high_above_avg');
+            
+            // Add rows
+            for (var i in data) {
+              var row = data[i];
+              var rowArray = [];
+              
+              // Massage data
+              row.date = new Date(i);
+              if (typeof data[i].record_max_previous != undefined) {
+                row.record_max = row.record_max_previous;
+                row.record_max_year = row.record_max_previous_year;
+              }
+              if (row.actual_max > row.record_max) {
+                row.record_broke = 'Yes';
+              }
+              rowArray.push({ v: i, f: row.date.format("mmm dd") });
+              rowArray.push(row.date);
+              rowArray.push(row.url);
+              rowArray.push(row.actual_max);
+              rowArray.push(row.actual_mean);
+              rowArray.push(row.average_max);
+              rowArray.push(row.average_mean);
+              rowArray.push(row.average_min);
+              rowArray.push(row.record_max);
+              rowArray.push(row.record_max_year);
+              rowArray.push(row.record_min);
+              rowArray.push(row.record_min_year);
+              rowArray.push(row.record_broke);
+              
+              var diff = ((row.actual_min - row.average_min) / row.average_min) * 100;
+              rowArray.push({ v: diff, f: diff.toFixed(2) + ' %' });
+              var diff = ((row.actual_max - row.average_max) / row.average_max) * 100;
+              rowArray.push({ v: diff, f: diff.toFixed(2) + ' %' });
+              
+              // Convert to array
+              table.addRow(rowArray);
+            }
+            
+            // Creaete view
+            var view = new google.visualization.DataView(table);
+            view.setColumns([0, 13, 14]);
+            
+            // Make chart
+            var options = {
+              title: '2012 Temperatures as difference from average.',
+              height: 500,
+              hAxis: {title: '2012 Date'},
+              vAxis: {title: 'Percent (%) difference from average'}
+            };
+            var chart = new google.visualization.LineChart(document.getElementById('temperature-chart'));
+            chart.draw(view, options);
+          });
+        });
       
       })(jQuery);
     </script>

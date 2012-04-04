@@ -26,27 +26,70 @@
   
   
     <div id="timeline"></div>
-    </div>
   
   
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
-    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/VeriteCo-Timeline-master-20120404/timeline-min.js"></script>
+    <!-- <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/VeriteCo-Timeline-master-20120404/timeline-min.js"></script> -->
+    <script type="text/javascript" src="js/timeline.js"></script>
     <script type="text/javascript">
       // Namespace jQuery
       (function($) {
+        var stations = [];
       
         $(document).ready(function() {
-          $.getJSON('data/temperature-records-twin-cities-2012.json', function(data) {
-          
-            timeline = new VMM.Timeline();
-            timeline.init("your_data.json");
-          
+          // Get station data
+          $.getJSON('data/noaa-mi3-station-data-mn-trimmed.json', function(data) {
+            stations = data;
+            
+            // Get live record temperature data
+            $.getJSON("https://api.scraperwiki.com/api/1.0/datastore/sqlite?format=jsondict&name=broken_temperature_record_from_pbs&query=select%20*%20from%20%60swdata%60%20where%20state%20%3D%20%22MN%22&callback=?", function(data) {
+              
+              // Define basic timeline
+              var timelineData = {};
+              timelineData.timeline = {};
+              timelineData.timeline.headline = 'Testing';
+              timelineData.timeline.type = 'default';
+              timelineData.timeline.startDate = '2012,01,01';
+              timelineData.timeline.text = 'still just testing';
+              timelineData.timeline.asset = {
+                media: 'http://2.bp.blogspot.com/-dxJbW0CG8Zs/TmkoMA5-cPI/AAAAAAAAAqw/fQpsz9GpFdo/s1600/voyage-dans-la-lune-1902-02-g.jpg',
+                credit: '',
+                caption: ''
+              };
+              timelineData.timeline.date = [];
+              
+              // Add records
+              /*
+              county: "OLMSTED"
+id: "2012-01-09--ROCHESTER-INTL-AP"
+previous_record: "46.0"
+previous_record_date: "2002-01-09"
+record: "46.0"
+record_date: "2012-01-09"
+state: "MN"
+station_name: "ROCHESTER INTL AP"
+timestamp: 1333570227 
+*/
+              for (var i in data) {
+                if (data[i].record_date) {
+                  var tempDate = data[i].record_date.split('-');
+                  timelineData.timeline.date.push({
+                    startDate: tempDate[0] + ',' + tempDate[1] + ',' + tempDate[2],
+                    headline: 'Record broken on ' + data[i].record_date,
+                    text: data[i].station_name
+                  });
+                }
+              }
+              
+              // Make timeline
+              console.log(timelineData);
+              var timeline = new VMM.Timeline();
+				      timeline.init(timelineData);
+            });
           });
         });
-      
       })(jQuery);
     </script>
-  
   </div>
   <!-- Embed End -->
 

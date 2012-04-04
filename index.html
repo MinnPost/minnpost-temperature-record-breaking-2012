@@ -46,23 +46,55 @@
       
         $(document).ready(function() {
           $.getJSON('data/temperature-records-twin-cities-2012.json', function(data) {
-            console.log(data);
             var seriesDataHigh = [];
             var seriesDataHighAvg = [];
             var seriesDataHighRecord = [];
+            var limit = new Date('2012-04-01');
+            var radiusDefault = 2;
             
             for (var i in data) {
-              seriesDataHigh.push({
-                x: data[i].date,
-                y: data[i].actual_max
-              });
+              var xVal = new Date(i);
+              
+              // Check date
+              if (xVal > limit) continue;
+              
+              // Massage data a bit
+              if (typeof data[i].record_max_previous != 'undefined' && data[i].record_max_previous != 0) {
+                data[i].record_max = data[i].record_max_previous;
+                data[i].record_max_year = data[i].record_max_previous_year;
+              }
+              
+              // Create data sets
+              if (data[i].actual_max > data[i].record_max) {
+                seriesDataHigh.push({
+                  x: xVal,
+                  y: data[i].actual_max,
+                  radius: 6,
+                  color: '#222222',
+                  dataLabels: {
+                    enabled: true,
+                    align: 'center',
+                    y: -15,
+                    style: {
+                      fontWeight: 'bold'
+                    }
+                  },
+                });
+              }
+              else {
+                seriesDataHigh.push({
+                  x: xVal,
+                  y: data[i].actual_max
+                });
+              }
               seriesDataHighAvg.push({
-                x: data[i].date,
+                x: xVal,
                 y: data[i].average_max
               });
               seriesDataHighRecord.push({
-                x: data[i].date,
-                y: data[i].record_max
+                x: xVal,
+                y: data[i].record_max,
+                name: data[i].record_max + ' in ' + data[i].record_max_year
               });
             }
             
@@ -77,9 +109,12 @@
               subtitle: {
                 text: 'Source: Weather Undergound'
               },
-              //xAxis: {
-              //  categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-              //},
+              xAxis: {
+                type: 'datetime',
+                dateTimeLabelFormats:  {
+                  day: '%b %e'   
+                }
+              },
               yAxis: {
                 title: {
                   text: 'Temperature'
@@ -97,7 +132,7 @@
               plotOptions: {
                 spline: {
                   marker: {
-                    radius: 2,
+                    radius: 1,
                     lineColor: '#666666',
                     lineWidth: 1
                   }
@@ -105,16 +140,16 @@
               },
               series: [
                 {
-                  name: 'Highs',
+                  name: 'High',
                   marker: {
-                    symbol: 'square'
+                    symbol: 'circle'
                   },
                   data: seriesDataHigh
                 },
                 {
                   name: 'Average',
                   marker: {
-                    symbol: 'circle'
+                    symbol: 'square'
                   },
                   data: seriesDataHighAvg
                 },

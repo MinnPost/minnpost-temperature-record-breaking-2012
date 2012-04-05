@@ -1,0 +1,111 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>MinnPost</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link type="text/css" rel="stylesheet" media="all" href="http://www.minnpost.com/sites/default/files/css/css_bb801627df93671ec2cf2a1c9ecf4ad2.css" />
+  <link type="text/css" rel="stylesheet" media="screen" href="http://www.minnpost.com/sites/default/files/css/css_b833827e9fdb99e83e393d38c32a71fd.css" />
+  <link type="text/css" rel="stylesheet" media="print" href="http://www.minnpost.com/sites/default/files/css/css_dd48b5b093a35515052acfc42613d628.css" />
+  <!--[if IE]>
+      <link rel="stylesheet" href="http://www.minnpost.com/sites/default/themes/derma/inc/css/ie.css?j" type="text/css">
+  <![endif]-->
+  <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+</head>
+<body class="front logged-in page-home one-sidebar sidebar-right admin-nw admin-vertical admin-df  one-sidebar sidebar-right">
+
+  <!-- Embed Start -->
+  <div class="node-body fieldlayout node-field-body">
+    <style type="text/css">
+      @import url('http://data.minnpost.s3.amazonaws.com/js/leaflet-0.3.1/leaflet.css');
+    </style>
+    <!--[if lte IE 8]>
+      <style>
+        @import url('http://data.minnpost.s3.amazonaws.com/js/leaflet-0.3.1/leaflet.ie.css');
+      </style>
+    <![endif]-->
+    <style type="text/css">
+      #temperature-map {
+        width: 500px;
+        height: 500px;
+      }
+    </style>
+  
+  
+    <div id="temperature-map"></div>
+  
+  
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-0.3.1/leaflet.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/wax-master-20120329/wax.leaf.min.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/datejs-alpha1/date.js"></script>
+    <script type="text/javascript">
+      // Namespace jQuery
+      (function($) {
+        var stations = [];
+      
+        $(document).ready(function() {
+          // Get station data
+          $.getJSON('data/noaa-mi3-station-data-mn-trimmed.json', function(data) {
+            stations = data;
+            
+            // Get live record temperature data
+            $.getJSON("https://api.scraperwiki.com/api/1.0/datastore/sqlite?format=jsondict&name=broken_temperature_record_from_pbs&query=select%20*%20from%20%60swdata%60%20where%20state%20%3D%20%22MN%22&callback=?", function(data) {
+              // Function to get coordinates
+              var getStation = function(name, stations) {
+                for (var j in stations) {
+                  if ($.trim(stations[j].station_name) == $.trim(name)) {
+                    return stations[j];
+                  }
+                }
+                return {};
+              };
+
+              // Group by date
+              var grouping = {};
+              for (var i in data) {
+                if (data[i].record_date) {
+                  var thisDate = Date.parse(data[i].record_date);
+                  grouping[data[i].record_date] = grouping[data[i].record_date] || {};
+                  grouping[data[i].record_date].date = thisDate.toISOString();
+                  grouping[data[i].record_date].date_formatted = thisDate.toString("MMM d");
+                  
+                  // Add places
+                  var station = getStation(data[i].station_name, stations);
+                  grouping[data[i].record_date].places = grouping[data[i].record_date].places || [];
+                  grouping[data[i].record_date].places.push({
+                    name: data[i].station_name,
+                    lat: station.lat,
+                    lon: station.lon,
+                    record: data[i].record,
+                    previous_record: data[i].previous_record,
+                    previous_record_date: data[i].previous_record_date,
+                  });
+                }
+              }
+              
+              console.log(grouping);
+              
+              // Make map
+              var tiles = new L.TileLayer("http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-streets/{z}/{x}/{y}.png", {
+                attribution: "Map imagery from <a href=http://mapbox.com'>Mapbox</a>", 
+                subdomains: ["a", "b", "c", "d"]
+              });
+              
+              var map = new L.Map('temperature-map', {
+                center: new L.LatLng(46.729553, -94.68589980000002),
+                zoom: 6,
+                layers: [tiles]
+              });
+            });
+          });
+        });
+      })(jQuery);
+    </script>
+  </div>
+  <!-- Embed End -->
+
+</body>
+</html>

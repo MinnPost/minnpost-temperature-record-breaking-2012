@@ -27,28 +27,73 @@
       </style>
     <![endif]-->
     <style type="text/css">
-      #temperature-map {
-        width: 800px;
+      #temperature-map,
+      #temperature-map-controls {
+        width: 50%;
         height: 500px;
+        float: left;
       }
-      #temperature-map-layers {
-        float: right;
-        width: 100px;
-      }
-      #temperature-map-layers label {
-        display: block;
+      .control-column {
+        float: left;
+        margin-right: 10px;
+        min-width: 80px;
+        max-width: 300px;
       }
       .leaflet-control-layers {
         display: none;
       }
+      .leaflet-control-layers-list label {
+        display: block;
+        cursor: pointer;
+        padding: 3px;
+        font-size: 75%;
+        width: 80px;
+        margin-right: 5px;
+      }
       .layer-selector-selected {
         background-color: #BBBBBB;
+      }
+      .leaflet-control-layers-list label input {
+        visibility: hidden;
+      }
+      .js-dependent {
+        display: none;
+      }
+      #temperature-map-controls h3 {
+        margin-left: 5px;
+      }
+      #temperature-map-stats ul,
+      #temperature-map-stats ul li {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      #temperature-map-stats ul li {
+        margin-bottom: 1em;
+      }
+      .stats-total-records {
+        font-weight: bold;
+      }
+      .popup-heading {
+        font-size: 1.5em;
+        margin-bottom: .5em;
       }
     </style>
   
   
-    <div id="temperature-map-layers"></div>
     <div id="temperature-map"></div>
+    <div id="temperature-map-controls">
+      <div id="temperature-map-layers" class="control-column">
+        <h3 class="js-dependent">Dates</h3>
+      </div>
+      <div id="temperature-map-stats" class="control-column">
+        <h3 class="js-dependent">Stats</h3>
+        <ul>
+          <li class="stats js-dependent">Total records broken in 2012: <span class="stats-total-records"></span></li>
+          <li class="stats js-dependent"><span class="stats-largest-change"></span></li>
+        </ul>
+      </div>
+    </div>
   
   
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
@@ -81,33 +126,39 @@
               // Group by date
               var grouping = {};
               var maxIncrease = 0;
+              var maxIncreaseData = {};
               for (var i in data) {
                 if (data[i].record_date) {
                   var thisDate = Date.parse(data[i].record_date);
+                  var previousDate = Date.parse(data[i].previous_record_date);
                   grouping[data[i].record_date] = grouping[data[i].record_date] || {};
                   grouping[data[i].record_date].date = thisDate.toISOString();
                   grouping[data[i].record_date].date_formatted = thisDate.toString("MMM d");
+                  grouping[data[i].record_date].date_object = thisDate;
                   
                   // Add places
                   var station = getStation(data[i].station_name, stations);
                   var diff = ((data[i].record - data[i].previous_record) / data[i].previous_record) + 0.01;
                   grouping[data[i].record_date].places = grouping[data[i].record_date].places || [];
-                  grouping[data[i].record_date].places.push({
+                  var place = {
                     name: data[i].station_name,
                     lat: station.lat,
                     lon: station.lon,
                     record: data[i].record,
                     previous_record: data[i].previous_record,
-                    previous_record_date: data[i].previous_record_date,
-                    difference: diff
-                  });
+                    previous_record_date: previousDate,
+                    difference: diff,
+                    date: thisDate
+                  };
+                  grouping[data[i].record_date].places.push(place);
                   
                   // Check max increase
-                  maxIncrease = (diff > maxIncrease) ? diff : maxIncrease;
+                  if (diff > maxIncrease) {
+                    maxIncrease = diff;
+                    maxIncreaseData = place;
+                  }
                 }
               }
-              
-              console.log(grouping);
               
               // Make map
               var tiles = new L.TileLayer("http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-light/{z}/{x}/{y}.png", {
@@ -130,15 +181,17 @@
                 stroke: false
               };
               
-              var makePopup = function(place) {
+              // Template for popup
+              var makePopup = function(place, date) {
                 var output = '';
                 output += '<div class="popup-heading">' + place.name + '</div>';
-                output += '<div class="popup-new-record">' + place.record + '</div>';
-                output += '<div class="popup-previous-record">' + place.previous_record + '</div>';
-                output += '<div class="popup-previous-record-year">' + place.previous_record_date + '</div>';
+                output += '<div class="popup-date">Date: <strong>' + date.toString('MMM d, yyyy') + '</strong></div>';
+                output += '<div class="popup-new-record">New record: <strong>' + place.record + ' &deg;F</strong></div>';
+                output += '<div class="popup-previous-record">Previous record: <strong>' + place.previous_record + ' &deg;F</strong> on <strong>' + place.previous_record_date.toString('yyyy') + '</strong></div>';
                 return output;
               }
     
+              // Create layer sets
               var overlayMaps = {};
               for (var g in grouping) {
                 var layerGroup = new L.LayerGroup();
@@ -148,7 +201,7 @@
                   var ratio = grouping[g].places[p].difference / maxIncrease;
                   var radius = 10000 + (ratio * 30000);
                   var circle = new L.Circle(new L.LatLng(grouping[g].places[p].lat, grouping[g].places[p].lon), radius, circleOptions);
-                  circle.bindPopup(makePopup(grouping[g].places[p]));
+                  circle.bindPopup(makePopup(grouping[g].places[p], grouping[g].date_object));
                   layerGroup.addLayer(circle);
                 }
                 
@@ -160,12 +213,22 @@
               var layersControl = new L.Control.Layers(overlayMaps, {});
               map.addControl(layersControl);
               
+              // DOM magic.
+              $('.js-dependent').show();
+              
+              // Take over the layer control
               $('#temperature-map-layers').append(layersControl._form);
               $('.leaflet-control-layers-list label').click(function(e) {
+                map.closePopup();
                 $('.leaflet-control-layers-list label').removeClass('layer-selector-selected')
                 $(this).addClass('layer-selector-selected');
               });
+              // Show latest entry
               $('.leaflet-control-layers-list label:last, .leaflet-control-layers-list label:last input').click();
+              
+              // Aggregate stats
+              $('.stats-total-records').text(data.length);
+              $('.stats-largest-change').html('The largest change was on ' + maxIncreaseData.date.toString('MMM d, yyyy') + ', the old record of ' + maxIncreaseData.previous_record + ' &deg;F on ' + maxIncreaseData.previous_record_date.toString('yyyy') + ' in ' + maxIncreaseData.name + ' increased by <strong>' + (maxIncreaseData.difference * 100).toFixed() + '%</strong> to ' + maxIncreaseData.record + ' &deg;F.');
             });
           });
         });

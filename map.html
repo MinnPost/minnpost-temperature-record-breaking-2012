@@ -28,12 +28,26 @@
     <![endif]-->
     <style type="text/css">
       #temperature-map {
-        width: 500px;
+        width: 800px;
         height: 500px;
+      }
+      #temperature-map-layers {
+        float: right;
+        width: 100px;
+      }
+      #temperature-map-layers label {
+        display: block;
+      }
+      .leaflet-control-layers {
+        display: none;
+      }
+      .layer-selector-selected {
+        background-color: #BBBBBB;
       }
     </style>
   
   
+    <div id="temperature-map-layers"></div>
     <div id="temperature-map"></div>
   
   
@@ -41,6 +55,7 @@
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-0.3.1/leaflet.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/wax-master-20120329/wax.leaf.min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/datejs-alpha1/date.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/matthewbj-Colors-master-20120405/colors.min.js"></script>
     <script type="text/javascript">
       // Namespace jQuery
       (function($) {
@@ -65,6 +80,7 @@
 
               // Group by date
               var grouping = {};
+              var maxIncrease = 0;
               for (var i in data) {
                 if (data[i].record_date) {
                   var thisDate = Date.parse(data[i].record_date);
@@ -74,6 +90,7 @@
                   
                   // Add places
                   var station = getStation(data[i].station_name, stations);
+                  var diff = ((data[i].record - data[i].previous_record) / data[i].previous_record) + 0.01;
                   grouping[data[i].record_date].places = grouping[data[i].record_date].places || [];
                   grouping[data[i].record_date].places.push({
                     name: data[i].station_name,
@@ -82,14 +99,18 @@
                     record: data[i].record,
                     previous_record: data[i].previous_record,
                     previous_record_date: data[i].previous_record_date,
+                    difference: diff
                   });
+                  
+                  // Check max increase
+                  maxIncrease = (diff > maxIncrease) ? diff : maxIncrease;
                 }
               }
               
               console.log(grouping);
               
               // Make map
-              var tiles = new L.TileLayer("http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-streets/{z}/{x}/{y}.png", {
+              var tiles = new L.TileLayer("http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-light/{z}/{x}/{y}.png", {
                 attribution: "Map imagery from <a href=http://mapbox.com'>Mapbox</a>", 
                 subdomains: ["a", "b", "c", "d"]
               });
@@ -103,9 +124,10 @@
               
               // Create marker layers
               circleOptions = {
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.5
+                color: '#801019',
+                fillColor: '#801019',
+                fillOpacity: 0.5,
+                stroke: false
               };
               
               var makePopup = function(place) {
@@ -123,18 +145,27 @@
                 
                 // Make points
                 for (var p in grouping[g].places) {
-                  var circle = new L.Circle(new L.LatLng(grouping[g].places[p].lat, grouping[g].places[p].lon), 200, circleOptions);
+                  var ratio = grouping[g].places[p].difference / maxIncrease;
+                  var radius = 10000 + (ratio * 30000);
+                  var circle = new L.Circle(new L.LatLng(grouping[g].places[p].lat, grouping[g].places[p].lon), radius, circleOptions);
                   circle.bindPopup(makePopup(grouping[g].places[p]));
                   layerGroup.addLayer(circle);
                 }
                 
                 map.addLayer(layerGroup);
-                overlayMaps[grouping[g].date_formatted] = layerGroup;
+                overlayMaps[grouping[g].date_formatted + ' (' + grouping[g].places.length + ')'] = layerGroup;
               }
 
-              // Add switcher
-              var layersControl = new L.Control.Layers(baseMaps, overlayMaps);
+              // Add switcher.  Show overlays as base layers so only one is viewed at a time.
+              var layersControl = new L.Control.Layers(overlayMaps, {});
               map.addControl(layersControl);
+              
+              $('#temperature-map-layers').append(layersControl._form);
+              $('.leaflet-control-layers-list label').click(function(e) {
+                $('.leaflet-control-layers-list label').removeClass('layer-selector-selected')
+                $(this).addClass('layer-selector-selected');
+              });
+              $('.leaflet-control-layers-list label:last, .leaflet-control-layers-list label:last input').click();
             });
           });
         });

@@ -93,12 +93,48 @@
                 attribution: "Map imagery from <a href=http://mapbox.com'>Mapbox</a>", 
                 subdomains: ["a", "b", "c", "d"]
               });
+              var baseMaps = { 'Mapbox Streets': tiles };
               
               var map = new L.Map('temperature-map', {
                 center: new L.LatLng(46.729553, -94.68589980000002),
                 zoom: 6,
                 layers: [tiles]
               });
+              
+              // Create marker layers
+              circleOptions = {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.5
+              };
+              
+              var makePopup = function(place) {
+                var output = '';
+                output += '<div class="popup-heading">' + place.name + '</div>';
+                output += '<div class="popup-new-record">' + place.record + '</div>';
+                output += '<div class="popup-previous-record">' + place.previous_record + '</div>';
+                output += '<div class="popup-previous-record-year">' + place.previous_record_date + '</div>';
+                return output;
+              }
+    
+              var overlayMaps = {};
+              for (var g in grouping) {
+                var layerGroup = new L.LayerGroup();
+                
+                // Make points
+                for (var p in grouping[g].places) {
+                  var circle = new L.Circle(new L.LatLng(grouping[g].places[p].lat, grouping[g].places[p].lon), 200, circleOptions);
+                  circle.bindPopup(makePopup(grouping[g].places[p]));
+                  layerGroup.addLayer(circle);
+                }
+                
+                map.addLayer(layerGroup);
+                overlayMaps[grouping[g].date_formatted] = layerGroup;
+              }
+
+              // Add switcher
+              var layersControl = new L.Control.Layers(baseMaps, overlayMaps);
+              map.addControl(layersControl);
             });
           });
         });

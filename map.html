@@ -27,40 +27,90 @@
       </style>
     <![endif]-->
     <style type="text/css">
-      #temperature-map,
+      .js-dependent {
+        display: none;
+      }
+      
+      /** Top level containers **/
+      #temperature-map-container,
       #temperature-map-controls {
-        width: 50%;
+        width: 65%;
         height: 500px;
         float: left;
       }
-      .control-column {
-        float: left;
-        margin-right: 10px;
-        min-width: 80px;
-        max-width: 300px;
+      #temperature-map-controls {
+        width: 35%;
       }
-      .leaflet-control-layers {
+      
+      /** Controls **/
+      #temperature-map-layers {
+        width: 30%;
+        float: left;
+        height: 500px;
+      }
+      #temperature-map-layer-data {
+        width: 69%;
+        float: left;
+        height: 500px;
+      }
+      
+      /** Add borders **/
+      #temperature-map,
+      .temperature-map-layer-data-container {
+        border: 1px solid #CDCDD0;
+      }
+      
+      /** Map **/
+      #temperature-map {
+        width: 100%;
+        height: 100%;
+      }
+      #temperature-map .leaflet-control-layers {
         display: none;
       }
+      
+      /** Data container **/
+      .temperature-map-layer-data-container {
+        width: 100%;
+        height: 100%;
+      }
+      .temperature-map-layer-data-container h3 {
+        margin-top: .5em;
+        margin-right: .5em;
+        margin-left: .5em;
+      }
+      .temperature-map-layer-data-container .layer-data-heading,
+      .temperature-map-layer-data-container ul {
+        margin-right: 1em;
+        margin-left: 1em;
+      }
+      
+      /** Layer selector **/
       .leaflet-control-layers-list label {
         display: block;
         cursor: pointer;
         padding: 3px;
         font-size: 75%;
-        width: 80px;
-        margin-right: 5px;
+        
+        -moz-transition: all 1s;
+        -webkit-transition: all 1s;
+        -o-transition: all 1s;
+        transition: all 1s;
       }
       .layer-selector-selected {
-        background-color: #BBBBBB;
+        background-color: #CDCDD0;
       }
       .leaflet-control-layers-list label input {
         visibility: hidden;
       }
-      .js-dependent {
-        display: none;
+      .leaflet-control-layers-list {
+        margin-top: 1em;
       }
-      #temperature-map-controls h3 {
-        margin-left: 5px;
+      
+      /** Map stats **/
+      #temperature-map-stats {
+        float: left;
+        padding: 1em;
       }
       #temperature-map-stats ul,
       #temperature-map-stats ul li {
@@ -74,25 +124,33 @@
       .stats-total-records {
         font-weight: bold;
       }
+      
+      /** Popup **/
       .popup-heading {
         font-size: 1.5em;
         margin-bottom: .5em;
       }
     </style>
   
-  
-    <div id="temperature-map"></div>
+    <div id="temperature-map-container">
+      <div id="temperature-map"></div>
+    </div>
+    
     <div id="temperature-map-controls">
       <div id="temperature-map-layers" class="control-column">
-        <h3 class="js-dependent">Dates</h3>
       </div>
-      <div id="temperature-map-stats" class="control-column">
-        <h3 class="js-dependent">Stats</h3>
-        <ul>
-          <li class="stats js-dependent">Total records broken in 2012: <span class="stats-total-records"></span></li>
-          <li class="stats js-dependent"><span class="stats-largest-change"></span></li>
-        </ul>
+      
+      <div id="temperature-map-layer-data" class="control-column">
+        <div class="temperature-map-layer-data-container"></div>
       </div>
+    </div>
+    
+    <div id="temperature-map-stats">
+      <h3 class="js-dependent">Stats</h3>
+      <ul>
+        <li class="stats js-dependent">Total records broken in 2012: <span class="stats-total-records"></span></li>
+        <li class="stats js-dependent"><span class="stats-largest-change"></span></li>
+      </ul>
     </div>
   
   
@@ -105,6 +163,9 @@
       // Namespace jQuery
       (function($) {
         var stations = [];
+        String.prototype.capitalize = function(){
+          return this.replace( /(^|\s)([a-z])/g , function(m,p1,p2){ return p1+p2.toUpperCase(); } );
+        };
       
         $(document).ready(function() {
           // Get station data
@@ -141,7 +202,7 @@
                   var diff = ((data[i].record - data[i].previous_record) / data[i].previous_record) + 0.01;
                   grouping[data[i].record_date].places = grouping[data[i].record_date].places || [];
                   var place = {
-                    name: data[i].station_name,
+                    name: data[i].station_name.toLowerCase().capitalize().replace('Ap', 'Airport'),
                     lat: station.lat,
                     lon: station.lon,
                     record: data[i].record,
@@ -174,7 +235,7 @@
               });
               
               // Create marker layers
-              circleOptions = {
+              var circleOptions = {
                 color: '#801019',
                 fillColor: '#801019',
                 fillOpacity: 0.5,
@@ -182,6 +243,19 @@
               };
               
               // Template for popup
+              var makeLayerData = function(group) {
+                var output = '';
+                output += '<h3>' + group.date_object.toString('MMM d, yyyy') + '</h3>';
+                output += '<div class="layer-data-heading">Records broken:</div>';
+                output += '<ul>';
+                for (var t in group.places) {
+                  output += '<li><strong>' + group.places[t].record + ' &deg;F</strong> in ' + group.places[t].name + '</li>';
+                }
+                output += '</ul>';
+                return output;
+              }
+              
+              // Template for group
               var makePopup = function(place, date) {
                 var output = '';
                 output += '<div class="popup-heading">' + place.name + '</div>';
@@ -193,8 +267,10 @@
     
               // Create layer sets
               var overlayMaps = {};
+              var groupIndex = [];
               for (var g in grouping) {
                 var layerGroup = new L.LayerGroup();
+                groupIndex.push(g);
                 
                 // Make points
                 for (var p in grouping[g].places) {
@@ -218,10 +294,20 @@
               
               // Take over the layer control
               $('#temperature-map-layers').append(layersControl._form);
+              
+              // Index layer with groups
+              $('.leaflet-control-layers-list label').each(function(index, value) {
+                $(this).data('tMapGroup', groupIndex[index]);
+              });
+              
+              // Handle layer clicking
               $('.leaflet-control-layers-list label').click(function(e) {
                 map.closePopup();
                 $('.leaflet-control-layers-list label').removeClass('layer-selector-selected')
                 $(this).addClass('layer-selector-selected');
+                
+                // Update layer data
+                $('.temperature-map-layer-data-container').html(makeLayerData(grouping[$(this).data('tMapGroup')]));
               });
               // Show latest entry
               $('.leaflet-control-layers-list label:last, .leaflet-control-layers-list label:last input').click();

@@ -49,12 +49,12 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
       
       /** Controls **/
       #temperature-map-layers {
-        width: 30%;
+        width: 40%;
         float: left;
         height: 500px;
       }
       #temperature-map-layer-data {
-        width: 69%;
+        width: 60%;
         float: left;
         height: 500px;
       }
@@ -89,12 +89,16 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
         margin-right: 1em;
         margin-left: 1em;
       }
+      .temperature-map-layer-data-container ul {
+        font-size: 75%;
+      }
       
       /** Layer selector **/
       .leaflet-control-layers-list label {
         display: block;
         cursor: pointer;
         padding: 3px;
+        padding-left: 15px;
         font-size: 75%;
         
         -moz-transition: all 0.2s;
@@ -371,7 +375,7 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
             };
             
             var timer = $.timer(datePlayerNext);
-            timer.set({ time : 3000});
+            timer.set({ time : 1500 });
             
             $('.player-pause').hide();
             $('.player-prev').click(function(e) {

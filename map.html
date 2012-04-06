@@ -286,12 +286,18 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
               maxZoom: 8,
               minZoom: 4
             });
-            var baseMaps = { 'Mapbox Streets': tiles };
+            var baseMaps = { 'MinnPost': tiles };
+            var minn = new L.TileLayer("https://s3.amazonaws.com/data.minnpost/maps/minnpost-basemaps-tiles/0.0.1/MinnPost+Base+Map/{z}/{x}/{y}.png", {
+              maxZoom: 8,
+              minZoom: 4,
+              scheme: 'tms'
+            });
+            var baseMaps = { 'MinnPost Minnesota': minn };
             
             var map = new L.Map('temperature-map', {
               center: new L.LatLng(46.729553, -94.68589980000002),
               zoom: 6,
-              layers: [tiles]
+              layers: [tiles, minn]
             });
             
             // Create marker layers

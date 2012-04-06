@@ -92,10 +92,10 @@
         padding: 3px;
         font-size: 75%;
         
-        -moz-transition: all 1s;
-        -webkit-transition: all 1s;
-        -o-transition: all 1s;
-        transition: all 1s;
+        -moz-transition: all 0.2s;
+        -webkit-transition: all 0.2s;
+        -o-transition: all 0.2s;
+        transition: all 0.2s;
       }
       .layer-selector-selected {
         background-color: #CDCDD0;
@@ -138,6 +138,12 @@
     
     <div id="temperature-map-controls">
       <div id="temperature-map-layers" class="control-column">
+        <div id="temperature-map-player" class="js-dependent">
+          <a class="player-prev" href="#play">Prev</a>
+          <a class="player-play" href="#play">Play</a>
+          <a class="player-stop" href="#play">Stop</a>
+          <a class="player-next" href="#play">Next</a>
+        </div>
       </div>
       
       <div id="temperature-map-layer-data" class="control-column">
@@ -156,9 +162,8 @@
   
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-0.3.1/leaflet.js"></script>
-    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/wax-master-20120329/wax.leaf.min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/datejs-alpha1/date.js"></script>
-    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/matthewbj-Colors-master-20120405/colors.min.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/jquery-timer-0.91/jquery.timer.js"></script>
     <script type="text/javascript">
       // Namespace jQuery
       (function($) {
@@ -303,7 +308,7 @@
               // Handle layer clicking
               $('.leaflet-control-layers-list label').click(function(e) {
                 map.closePopup();
-                $('.leaflet-control-layers-list label').removeClass('layer-selector-selected')
+                $('.leaflet-control-layers-list label').removeClass('layer-selector-selected');
                 $(this).addClass('layer-selector-selected');
                 
                 // Update layer data
@@ -315,6 +320,48 @@
               // Aggregate stats
               $('.stats-total-records').text(data.length);
               $('.stats-largest-change').html('The largest change was on ' + maxIncreaseData.date.toString('MMM d, yyyy') + ', the old record of ' + maxIncreaseData.previous_record + ' &deg;F on ' + maxIncreaseData.previous_record_date.toString('yyyy') + ' in ' + maxIncreaseData.name + ' increased by <strong>' + (maxIncreaseData.difference * 100).toFixed() + '%</strong> to ' + maxIncreaseData.record + ' &deg;F.');
+              
+              // Player (we start on the newest entry)
+              var dateIndex = groupIndex.length - 1;
+              var datePlayerNext = function() {
+                if (dateIndex >= groupIndex.length - 1) {
+                  dateIndex = 0;
+                  timer.stop();
+                }
+                else {
+                  dateIndex++;
+                }
+                $('.leaflet-control-layers-list label:eq(' + (dateIndex) + ') input').click();
+              };
+              var datePlayerPrev = function() {
+                if (dateIndex <= 0) {
+                  dateIndex = groupIndex.length -1;
+                }
+                else {
+                  dateIndex--;
+                }
+                $('.leaflet-control-layers-list label:eq(' + (dateIndex) + ') input').click();
+              };
+              
+              var timer = $.timer(datePlayerNext);
+              timer.set({ time : 3000});
+              
+              $('.player-prev').click(function(e) {
+                e.preventDefault();
+                datePlayerPrev();
+              });
+              $('.player-play').click(function(e) {
+                e.preventDefault();
+                timer.play();
+              });
+              $('.player-stop').click(function(e) {
+                e.preventDefault();
+                timer.stop();
+              });
+              $('.player-next').click(function(e) {
+                e.preventDefault();
+                datePlayerNext();
+              });
             });
           });
         });

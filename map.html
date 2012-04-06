@@ -27,7 +27,8 @@
       </style>
     <![endif]-->
     <style type="text/css">
-      .js-dependent {
+      .js-dependent,
+      .hide {
         display: none;
       }
       
@@ -130,6 +131,42 @@
         font-size: 1.5em;
         margin-bottom: .5em;
       }
+      
+      /** Player **/
+      #temperature-map-player {
+        background-color: #CDCDD0;
+        padding: 2px 3px;
+        border-radius: 3px;
+        text-align: center;
+        margin: 0 10px;
+      }
+      .player-button {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        line-height: 14px;
+        vertical-align: text-top;
+        background-image: url("https://s3.amazonaws.com/data.minnpost/js/bootstrap-2.0.2/img/glyphicons-halflings.png");
+        background-position: 14px 14px;
+        background-repeat: no-repeat;
+        margin: 2px 3px;
+        color: transparent;
+      }
+      .player-play {
+        background-position: -264px -72px;
+      }
+      .player-pause {
+        background-position: -288px -72px;
+      }
+      .player-stop {
+        background-position: -312px -72px;
+      }
+      .player-next {
+        background-position: -336px -72px;
+      }
+      .player-prev {
+        background-position: -240px -72px;
+      }
     </style>
   
     <div id="temperature-map-container">
@@ -139,10 +176,11 @@
     <div id="temperature-map-controls">
       <div id="temperature-map-layers" class="control-column">
         <div id="temperature-map-player" class="js-dependent">
-          <a class="player-prev" href="#play">Prev</a>
-          <a class="player-play" href="#play">Play</a>
-          <a class="player-stop" href="#play">Stop</a>
-          <a class="player-next" href="#play">Next</a>
+          <a class="player-button player-prev" title="Show the previous date." href="#play">Prev</a>
+          <a class="player-button player-pause hide" title="Pause the playing through of dates." href="#play">Pause</a>
+          <a class="player-button player-play" title="Automatically go through the dates from the beginning." href="#play">Play</a>
+          <a class="player-button player-stop" title="Stop." href="#play">Stop</a>
+          <a class="player-button player-next" title="Show the next date." href="#play">Next</a>
         </div>
       </div>
       
@@ -324,35 +362,38 @@
               // Player (we start on the newest entry)
               var dateIndex = groupIndex.length - 1;
               var datePlayerNext = function() {
-                if (dateIndex >= groupIndex.length - 1) {
-                  dateIndex = 0;
+                dateIndex = (dateIndex >= groupIndex.length - 1) ? 0 : dateIndex + 1;
+                if (dateIndex == groupIndex.length - 1) {
                   timer.stop();
-                }
-                else {
-                  dateIndex++;
                 }
                 $('.leaflet-control-layers-list label:eq(' + (dateIndex) + ') input').click();
               };
               var datePlayerPrev = function() {
-                if (dateIndex <= 0) {
-                  dateIndex = groupIndex.length -1;
-                }
-                else {
-                  dateIndex--;
-                }
+                dateIndex = (dateIndex <= 0) ? groupIndex.length -1 : dateIndex - 1;
                 $('.leaflet-control-layers-list label:eq(' + (dateIndex) + ') input').click();
               };
               
               var timer = $.timer(datePlayerNext);
               timer.set({ time : 3000});
               
+              $('.player-pause').hide();
               $('.player-prev').click(function(e) {
                 e.preventDefault();
                 datePlayerPrev();
               });
               $('.player-play').click(function(e) {
                 e.preventDefault();
-                timer.play();
+                dateIndex = -1;
+                timer.play(true);
+                datePlayerNext();
+                $('.player-pause').show();
+                $(this).hide();
+              });
+              $('.player-pause').click(function(e) {
+                e.preventDefault();
+                timer.pause();
+                $('.player-play').show();
+                $(this).hide();
               });
               $('.player-stop').click(function(e) {
                 e.preventDefault();

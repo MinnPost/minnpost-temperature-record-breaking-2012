@@ -42,8 +42,6 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
         height: 500px;
         float: left;
       }
-      
-      /** Controls **/
       #temperature-map-layers {
         width: 15%;
         float: left;
@@ -281,8 +279,8 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
               }
             }
             
-            // Make map
-            var tiles = new L.TileLayer("http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-light/{z}/{x}/{y}.png", {
+            // Make map // "http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-light/{z}/{x}/{y}.png"
+            var tiles = new L.TileLayer("http://{s}.tiles.mapbox.com/v3/zzolo.map-6m4vfqel/{z}/{x}/{y}.png", {
               attribution: "Map imagery from <a href=http://mapbox.com'>Mapbox</a>", 
               subdomains: ["a", "b", "c", "d"],
               maxZoom: 8,
@@ -428,7 +426,7 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
             });
             
             // Aggregate stats
-            $('#temperature-map-stats').html('So far, <strong>' + data.length + '</strong> temperature records have been broken in 2012.  The largest record change happened in ' + maxIncreaseData.name + ' on ' + maxIncreaseData.date.toString('MMM d, yyyy') + ', when the old record of ' + maxIncreaseData.previous_record + ' &deg;F in ' + maxIncreaseData.previous_record_date.toString('yyyy') + ' increased by <strong>' + (maxIncreaseData.difference * 100 + 100).toFixed() + '%</strong> to ' + maxIncreaseData.record + ' &deg;F.');
+            $('#temperature-map-stats').html('So far, <strong>' + data.length + '</strong> temperature records at Minnesota\'s major airports have been broken in 2012.  The largest record change happened at ' + maxIncreaseData.name + ' on ' + maxIncreaseData.date.toString('MMM d, yyyy') + ', when the old record of ' + maxIncreaseData.previous_record + ' &deg;F in ' + maxIncreaseData.previous_record_date.toString('yyyy') + ' increased by <strong>' + (maxIncreaseData.difference * 100 + 100).toFixed() + '%</strong> to ' + maxIncreaseData.record + ' &deg;F.');
           });
         });
       })(jQuery);

@@ -37,24 +37,20 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
       }
       
       /** Top level containers **/
-      #temperature-map-container,
-      #temperature-map-controls {
+      #temperature-map-container {
         width: 65%;
         height: 500px;
         float: left;
       }
-      #temperature-map-controls {
-        width: 35%;
-      }
       
       /** Controls **/
       #temperature-map-layers {
-        width: 40%;
+        width: 15%;
         float: left;
         height: 500px;
       }
       #temperature-map-layer-data {
-        width: 60%;
+        width: 20%;
         float: left;
         height: 500px;
       }
@@ -118,7 +114,7 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
       
       /** Map stats **/
       #temperature-map-stats {
-        float: left;
+        clear: both;
         padding: 1em 0;
       }
       #temperature-map-attribution {
@@ -172,39 +168,32 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
         #temperature-map-container {
           width: 75%;
         }
-        #temperature-map-controls {
-          width: 25%;
-        }
-        
-        /** Controls **/
         #temperature-map-layers {
-          width: 100%;
+          width: 25%;
         }
         #temperature-map-layer-data {
           display: none;
         }
       }
     </style>
+    
+    <div id="temperature-map-layers" class="control-column">
+      <div id="temperature-map-player" class="js-dependent">
+        <a class="player-button player-prev" title="Show the previous date." href="#prev">Prev</a>
+        <a class="player-button player-pause hide" title="Pause the playing through of dates." href="#pause">Pause</a>
+        <a class="player-button player-play" title="Automatically go through the dates from the beginning." href="#play">Play</a>
+        <a class="player-button player-stop" title="Stop." href="#stop">Stop</a>
+        <a class="player-button player-next" title="Show the next date." href="#next">Next</a>
+      </div>
+    </div>
   
     <div id="temperature-map-container">
       <div id="temperature-map"></div>
     </div>
     
-    <div id="temperature-map-controls">
-      <div id="temperature-map-layers" class="control-column">
-        <div id="temperature-map-player" class="js-dependent">
-          <a class="player-button player-prev" title="Show the previous date." href="#prev">Prev</a>
-          <a class="player-button player-pause hide" title="Pause the playing through of dates." href="#pause">Pause</a>
-          <a class="player-button player-play" title="Automatically go through the dates from the beginning." href="#play">Play</a>
-          <a class="player-button player-stop" title="Stop." href="#stop">Stop</a>
-          <a class="player-button player-next" title="Show the next date." href="#next">Next</a>
-        </div>
-      </div>
-      
-      <div id="temperature-map-layer-data" class="control-column">
-        <div id="temperature-map-layer-data-inner">
-          <div class="temperature-map-layer-data-container"></div>
-        </div>
+    <div id="temperature-map-layer-data" class="control-column">
+      <div id="temperature-map-layer-data-inner">
+        <div class="temperature-map-layer-data-container"></div>
       </div>
     </div>
     

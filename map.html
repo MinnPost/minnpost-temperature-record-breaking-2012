@@ -37,20 +37,18 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
       }
       
       /** Top level containers **/
+      #temperature-map-layers,
+      #temperature-map-layer-data,
       #temperature-map-container {
         width: 65%;
-        height: 500px;
+        height: 700px;
         float: left;
       }
       #temperature-map-layers {
         width: 15%;
-        float: left;
-        height: 500px;
       }
       #temperature-map-layer-data {
         width: 20%;
-        float: left;
-        height: 500px;
       }
       
       /** Add borders **/
@@ -295,8 +293,8 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
             var baseMaps = { 'MinnPost Minnesota': minn };
             
             var map = new L.Map('temperature-map', {
-              center: new L.LatLng(46.479553, -94.68589980000002),
-              zoom: 6,
+              center: new L.LatLng(46.479553, -93.98589980000002),
+              zoom: 7,
               layers: [tiles, minn]
             });
             

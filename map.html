@@ -62,9 +62,6 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
         width: 100%;
         height: 100%;
       }
-      #temperature-map .leaflet-control-layers {
-        display: none;
-      }
       
       /** Data container **/
       #temperature-map-layer-data-inner {
@@ -100,9 +97,6 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
       }
       .layer-selector-selected {
         background-color: #CDCDD0;
-      }
-      .leaflet-control-layers-list label input {
-        visibility: hidden;
       }
       .leaflet-control-layers-list {
         margin-top: 1em;
@@ -142,6 +136,8 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
         background-repeat: no-repeat;
         margin: 2px 3px;
         color: transparent;
+        font-size: 0.001;
+        font-size: 0;
       }
       .player-play {
         background-position: -264px -72px;
@@ -173,6 +169,14 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
       }
     </style>
     
+    <!--[if lte IE 8]>
+      <style>
+        #temperature-map-layer-data {
+          width: 19%;
+        }
+      </style>
+    <![endif]-->
+    
     <div id="temperature-map-layers" class="control-column">
       <div id="temperature-map-player" class="js-dependent">
         <a class="player-button player-prev" title="Show the previous date." href="#prev">Prev</a>
@@ -201,25 +205,27 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
     </div>
   
   
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
+    <script type="text/javascript">window.jQuery || document.write('<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"><\/script>')</script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-0.3.1/leaflet.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/datejs-alpha1/date.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/jquery-timer-0.91/jquery.timer.js"></script>
     <script type="text/javascript">
+      String.prototype.capitalize = function(){
+        return this.replace( /(^|\s)([a-z])/g , function(m,p1,p2){ return p1+p2.toUpperCase(); } );
+      };
+        
       // Namespace jQuery
       (function($) {
-        String.prototype.capitalize = function(){
-          return this.replace( /(^|\s)([a-z])/g , function(m,p1,p2){ return p1+p2.toUpperCase(); } );
-        };
       
         $(document).ready(function() {
           
           // Get live record temperature data
           $.getJSON("https://api.scraperwiki.com/api/1.0/datastore/sqlite?format=jsondict&name=broken_temperature_record_from_pbs&query=select%20*%20from%20%60swdata%60%20where%20state%20%3D%20%22MN%22&callback=?", function(data) {
             // Function to get coordinates
-            var getStation = function(name, stations) {
-              for (var j in stations) {
-                if ($.trim(stations[j].station_name) == $.trim(name)) {
+            function getStation(name, stations) {
+              var j;
+              for (j in stations) {
+                if (stations[j].station_name == name) {
                   return stations[j];
                 }
               }
@@ -227,17 +233,13 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
             };
             
             // Sort by date
-            console.log(data);
-            data.sort(function(a, b) {
-              if (a.record_date > b.record_date) {
-                return 1;
-              }
-              else if (a.record_date < b.record_date) {
-                return -1;
-              }
-              else {
-                return 0;
-              }
+            data.sort(function(m1, p1) {
+              var m = ('' + m1.record_date).toLowerCase();
+              var p = ('' + p1.record_date).toLowerCase();
+
+              if (m > p) return 1;
+              if (m < p) return -1;
+              return 0;
             });
 
             // Group by date
@@ -248,8 +250,10 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
               if (data[i].record_date) {
                 var thisDate = Date.parse(data[i].record_date);
                 var previousDate = Date.parse(data[i].previous_record_date);
-                grouping[data[i].record_date] = grouping[data[i].record_date] || {};
-                grouping[data[i].record_date].date = thisDate.toISOString();
+                if (typeof grouping[data[i].record_date] == 'undefined') {
+                  grouping[data[i].record_date] = {};
+                }
+                grouping[data[i].record_date].date = thisDate;
                 grouping[data[i].record_date].date_formatted = thisDate.toString("MMM d");
                 grouping[data[i].record_date].date_object = thisDate;
                 
@@ -348,7 +352,7 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
               overlayMaps[grouping[g].date_formatted + ' (' + grouping[g].places.length + ')'] = layerGroup;
             }
 
-            // Add switcher.  Show overlays as base layers so only one is viewed at a time.
+            // Add switcher. 
             var dateIndex = groupIndex.length - 1;
             var layersControl = new L.Control.Layers(overlayMaps, {});
             map.addControl(layersControl);
@@ -357,7 +361,9 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
             $('.js-dependent').show();
             
             // Take over the layer control
-            $('#temperature-map-layers').append(layersControl._form);
+            //$('#temperature-map-layers').append(layersControl._form);
+            //$('#temperature-map .leaflet-control-layers').hide();
+            //$('.leaflet-control-layers-list label input').css('visibility', 'hidden');
             
             // Index layer with groups
             $('.leaflet-control-layers-list label').each(function(index, value) {
@@ -374,6 +380,7 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
               $('.temperature-map-layer-data-container').html(makeLayerData(grouping[$(this).data('tMapGroup')]));
               dateIndex = $(this).index();
             });
+            
             // Show latest entry
             $('.leaflet-control-layers-list label:last, .leaflet-control-layers-list label:last input').click();
             

@@ -361,20 +361,26 @@ var stations = [{"state_county": "MINNESOTA/NORMAN", "lat": "47.2937", "station_
             $('.js-dependent').show();
             
             // Take over the layer control
-            //$('#temperature-map-layers').append(layersControl._form);
-            //$('#temperature-map .leaflet-control-layers').hide();
-            //$('.leaflet-control-layers-list label input').css('visibility', 'hidden');
+            $('#temperature-map-layers').append(layersControl._form);
+            $('#temperature-map .leaflet-control-layers').hide();
+            if (!$.browser.msie) {
+              $('.leaflet-control-layers-list label input').css('visibility', 'hidden');
+            }
             
             // Index layer with groups
             $('.leaflet-control-layers-list label').each(function(index, value) {
               $(this).data('tMapGroup', groupIndex[index]);
+              $(this).find('input').prop('checked', false);
             });
             
             // Handle layer clicking
             $('.leaflet-control-layers-list label').click(function(e) {
               map.closePopup();
-              $('.leaflet-control-layers-list label').removeClass('layer-selector-selected');
+              $('.leaflet-control-layers-list label').removeClass('layer-selector-selected')
+                .not(this).find('input').prop('checked', false);
+              
               $(this).addClass('layer-selector-selected');
+              $(this).find('input').prop('checked', true);
               
               // Update layer data
               $('.temperature-map-layer-data-container').html(makeLayerData(grouping[$(this).data('tMapGroup')]));

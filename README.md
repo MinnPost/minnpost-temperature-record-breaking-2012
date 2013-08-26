@@ -11,7 +11,7 @@ What temperature records were broken in 2012 in MN.
 
 Data was originally scraped from the PBS site here on [ScraperWiki](https://classic.scraperwiki.com/scrapers/broken_temperature_record_from_pbs/).
 
-Since 2012 has passed, this has been stored locally in this repo on 2013-08-26.
+Since 2012 has passed, the scraper and data have been stored locally in this repo on 2013-08-26.
 
 ## Prerequisites
 

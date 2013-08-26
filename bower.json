@@ -18,7 +18,9 @@
   "dependencies": {
     "datejs": "*",
     "jquery-timer": "https://github.com/jchavannes/jquery-timer.git",
-    "jquery": "git://github.com/components/jquery.git#1.9",
-    "leaflet": "~0.6.4"
+    "jquery": "1.9",
+    "leaflet": "~0.6.4",
+    "jquery-jsonp": "~2.4.0",
+    "underscore": "~1.5.1"
   }
 }

@@ -1,0 +1,137 @@
+
+.js-dependent,
+.hide {
+  display: none;
+}
+
+/** Top level containers **/
+#temperature-map-layers,
+#temperature-map-layer-data,
+#temperature-map-container {
+  width: 65%;
+  height: 725px;
+  float: left;
+}
+#temperature-map-layers {
+  width: 15%;
+}
+#temperature-map-layer-data {
+  width: 20%;
+}
+
+/** Add borders **/
+#temperature-map,
+#temperature-map-layer-data-inner {
+  border: 1px solid #CDCDD0;
+}
+
+/** Map **/
+#temperature-map {
+  width: 100%;
+  height: 100%;
+}
+
+/** Data container **/
+#temperature-map-layer-data-inner {
+  width: 100%;
+  height: 100%;
+}
+.temperature-map-layer-data-container {
+  padding: 1em;
+}
+.temperature-map-layer-data-container ul {
+  font-size: 75%;
+  list-style: none;
+  padding: 0;
+}
+.temperature-map-layer-data-container ul li {
+  list-style: none;
+  margin: 0 0 1em 0;
+  padding: 0;
+}
+
+/** Layer selector **/
+.leaflet-control-layers-list label {
+  display: block;
+  cursor: pointer;
+  padding: 3px;
+  padding-left: 15px;
+  font-size: 75%;
+  
+  -moz-transition: all 0.2s;
+  -webkit-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  transition: all 0.2s;
+}
+.layer-selector-selected {
+  background-color: #CDCDD0;
+}
+.leaflet-control-layers-list {
+  margin-top: 1em;
+}
+
+/** Map stats **/
+#temperature-map-stats {
+  clear: both;
+  padding: 1em 0;
+}
+#temperature-map-attribution {
+  padding-top: 1em;
+}
+
+/** Popup **/
+.popup-heading {
+  font-size: 1.5em;
+  margin-bottom: .5em;
+}
+
+/** Player **/
+#temperature-map-player {
+  background-color: #CDCDD0;
+  padding: 2px 3px;
+  border-radius: 3px;
+  text-align: center;
+  margin: 1em 10px 0 10px;
+}
+.player-button {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  vertical-align: text-top;
+  background-image: url("https://s3.amazonaws.com/data.minnpost/js/bootstrap-2.0.2/img/glyphicons-halflings.png");
+  background-position: 14px 14px;
+  background-repeat: no-repeat;
+  margin: 2px 3px;
+  color: transparent;
+  font-size: 0.001;
+  font-size: 0;
+}
+.player-play {
+  background-position: -264px -72px;
+}
+.player-pause {
+  background-position: -288px -72px;
+}
+.player-stop {
+  background-position: -312px -72px;
+}
+.player-next {
+  background-position: -336px -72px;
+}
+.player-prev {
+  background-position: -240px -72px;
+}
+
+/** Media queries **/
+@media all and (max-width: 750px) {
+  #temperature-map-container {
+    width: 75%;
+  }
+  #temperature-map-layers {
+    width: 25%;
+  }
+  #temperature-map-layer-data {
+    display: none;
+  }
+}

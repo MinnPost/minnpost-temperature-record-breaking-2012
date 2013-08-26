@@ -1,0 +1,24 @@
+{
+  "name": "minnpost-temperature-record-breaking-2012",
+  "version": "0.0.1",
+  "homepage": "https://github.com/MinnPost/minnpost-temperature-record-breaking-2012",
+  "authors": [
+    "Alan Palazzolo <apalazzolo@minnpost.com>"
+  ],
+  "description": "MN Temperature Records for 2012",
+  "main": "index.html",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "datejs": "*",
+    "jquery-timer": "https://github.com/jchavannes/jquery-timer.git",
+    "jquery": "git://github.com/components/jquery.git#1.9",
+    "leaflet": "~0.6.4"
+  }
+}

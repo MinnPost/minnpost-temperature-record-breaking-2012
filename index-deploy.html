@@ -89,13 +89,13 @@ addthis_config = Drupal.settings.addthis.config_default; addthis_share = Drupal.
 
     <!-- Application CSS -->
     <style type="text/css">
-      @import url('./bower_components/leaflet/dist/leaflet.css');
-      @import url('./css/styles.css');
+      @import url('https://s3.amazonaws.com/data.minnpost/projects/minnpost-temperature-record-breaking-2012/minnpost-temperature-record-breaking-2012.libs.css');
+      @import url('https://s3.amazonaws.com/data.minnpost/projects/minnpost-temperature-record-breaking-2012/minnpost-temperature-record-breaking-2012.latest.css');
     </style>
     <!--[if lte IE 8]>
       <style type="text/css">
-        @import url('./bower_components/leaflet/dist/leaflet.ie.css');
-        @import url('./css/styles.ie.css');
+        @import url('https://s3.amazonaws.com/data.minnpost/projects/minnpost-temperature-record-breaking-2012/minnpost-temperature-record-breaking-2012.ie.css);
+        @import url('https://s3.amazonaws.com/data.minnpost/projects/minnpost-temperature-record-breaking-2012/minnpost-temperature-record-breaking-2012.latest.ie.css');
       </style>
     <![endif]-->
 
@@ -176,14 +176,8 @@ addthis_config = Drupal.settings.addthis.config_default; addthis_share = Drupal.
       }
     </script>
     
-    <script type="text/javascript" src="./bower_components/jquery/jquery.min.js"></script>
-    <script type="text/javascript" src="./bower_components/underscore/underscore-min.js"></script>
-    <script type="text/javascript" src="./bower_components/jquery-jsonp/src/jquery.jsonp.js"></script>
-    <script type="text/javascript" src="./bower_components/leaflet/dist/leaflet.js"></script>
-    <script type="text/javascript" src="./bower_components/datejs/build/date.js"></script>
-    <script type="text/javascript" src="./bower_components/jquery-timer/jquery.timer.js"></script>
-
-    <script type="text/javascript" src="./js/app.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/projects/minnpost-temperature-record-breaking-2012/minnpost-temperature-record-breaking-2012.libs.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/projects/minnpost-temperature-record-breaking-2012/minnpost-temperature-record-breaking-2012.latest.js"></script>
 
     <!--
       Please follow the JS coding guidelines that
@@ -194,7 +188,7 @@ addthis_config = Drupal.settings.addthis.config_default; addthis_share = Drupal.
       (function($) {
         $(document).ready(function() {
           mpTempApp({
-            dataPath: './data/'
+            dataPath: 'https://s3.amazonaws.com/data.minnpost/projects/minnpost-temperature-record-breaking-2012/data/'
           });
         });
       })(jQuery);

@@ -7,7 +7,7 @@ String.prototype.capitalize = function(){
 (function($) {
 
   window.mpTempApp = function(options) {
-    var proxyPrefix = options.proxyPrefix || '';
+    var proxyPrefix = 'http://mp-jsonproxy.herokuapp.com/proxy?callback=?&url=';
     var dataPath = options.dataPath || './data/';
     var dataHolder = {};
   

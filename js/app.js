@@ -6,11 +6,10 @@ String.prototype.capitalize = function(){
       
 (function($) {
 
-  $(document).ready(function() {
-    var proxyPrefix = '';
-    var dataPath = './data/';
+  window.mpTempApp = function(options) {
+    var proxyPrefix = options.proxyPrefix || '';
+    var dataPath = options.dataPath || './data/';
     var dataHolder = {};
-  
   
     // Get data wrapper
     function getLocalData(name) {
@@ -270,5 +269,5 @@ String.prototype.capitalize = function(){
       $('#temperature-map-stats').html('So far, <strong>' + data.length + '</strong> temperature records at Minnesota\'s major airports have been broken in 2012.');
       //$('#temperature-map-stats').html('So far, <strong>' + data.length + '</strong> temperature records at Minnesota\'s major airports have been broken in 2012.  The largest record change happened at ' + maxIncreaseData.name + ' on ' + maxIncreaseData.date.toString('MMM d, yyyy') + ', when the old record of ' + maxIncreaseData.previous_record + ' &deg;F in ' + maxIncreaseData.previous_record_date.toString('yyyy') + ' increased by <strong>' + (maxIncreaseData.difference * 100 + 100).toFixed() + '%</strong> to ' + maxIncreaseData.record + ' &deg;F.');
     }
-  });
+  }
 })(jQuery);

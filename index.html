@@ -192,6 +192,14 @@ addthis_config = Drupal.settings.addthis.config_default; addthis_share = Drupal.
       https://github.com/MinnPost/javascript
     -->
     <script type="text/javascript">
+      (function($) {
+        $(document).ready(function() {
+          mpTempApp({
+            proxyPrefix: '',
+            dataPath: './data/'
+          });
+        });
+      })(jQuery);
     </script>
     
     <script type="text/javascript">

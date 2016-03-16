@@ -7,7 +7,7 @@ String.prototype.capitalize = function(){
 (function($) {
 
   window.mpTempApp = function(options) {
-    var proxyPrefix = 'http://mp-jsonproxy.herokuapp.com/proxy?callback=?&url=';
+    var proxyPrefix = 'https://mp-jsonproxy.herokuapp.com/proxy?callback=?&url=';
     var dataPath = options.dataPath || './data/';
     var dataHolder = {};
   
@@ -118,9 +118,9 @@ String.prototype.capitalize = function(){
         }
       }
       
-      // Make map // "http://{s}.tiles.mapbox.com/v3/mapbox.mapbox-light/{z}/{x}/{y}.png"
-      var tiles = new L.TileLayer("http://{s}.tiles.mapbox.com/v3/minnpost.map-wi88b700/{z}/{x}/{y}.png", {
-        attribution: "Map imagery from <a href=http://mapbox.com'>Mapbox</a>", 
+      // Make map // "https://{s}.tiles.mapbox.com/v3/mapbox.mapbox-light/{z}/{x}/{y}.png"
+      var tiles = new L.TileLayer("https://{s}.tiles.mapbox.com/v3/minnpost.map-wi88b700/{z}/{x}/{y}.png", {
+        attribution: "Map imagery from <a href=https://mapbox.com'>Mapbox</a>", 
         subdomains: ["a", "b", "c", "d"],
         maxZoom: 8,
         minZoom: 4
